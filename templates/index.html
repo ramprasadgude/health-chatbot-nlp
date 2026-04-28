@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health AI Chatbot</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+        margin: 0;
+        /* Dynamic elegant dark gradient */
+        background: radial-gradient(circle at 15% 50%, rgba(20, 30, 48, 1), rgba(36, 59, 85, 1));
+        background-size: 200% 200%;
+        animation: bgAnimation 15s ease infinite;
+        color: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        min-height: 100dvh;
+        backdrop-filter: blur(20px);
+        overflow: hidden;
+    }
+
+    @keyframes bgAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* MAIN CONTAINER - GLASSMORPHISM */
+    .container {
+        width: 100%;
+        max-width: 900px;
+        height: 90vh;
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    /* HEADER */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 30px;
+        background: rgba(0, 0, 0, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .header h3 {
+    font-weight: 600;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+
+    -webkit-background-clip: text; /* Chrome/Safari */
+    background-clip: text;         /* Standard (fixes warning) */
+
+    -webkit-text-fill-color: transparent;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .header h3 i {
+        -webkit-text-fill-color: initial;
+        color: #00c6ff;
+    }
+    
+    
+    .header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .btn-clear {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 12px;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: 0.3s ease;
+        font-size: 1rem;
+    }
+    .btn-clear:hover {
+        background: rgba(239, 68, 68, 0.3);
+    }
+
+    select {
+        padding: 8px 16px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        outline: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: 0.3s ease;
+    }
+
+    select:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    select option {
+        background: #1e293b;
+        color: white;
+    }
+
+    /* CHAT AREA */
+    .chat-box {
+        flex: 1;
+        overflow-y: auto;
+        padding: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* Custom Scrollbar */
+    .chat-box::-webkit-scrollbar {
+        width: 8px;
+    }
+    .chat-box::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .chat-box::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+    }
+
+    /* MESSAGE */
+    .message {
+        max-width: 75%;
+        padding: 14px 20px;
+        border-radius: 20px;
+        white-space: pre-line;
+        font-size: 1.05rem;
+        line-height: 1.5;
+        opacity: 0;
+        animation: fadeSlideUp 0.4s ease forwards;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes fadeSlideUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* USER */
+    .user {
+        align-self: flex-end;
+        background: linear-gradient(135deg, #00b4db, #0083b0);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    /* BOT */
+    .bot {
+        align-self: flex-start;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom-left-radius: 4px;
+        backdrop-filter: blur(10px);
+    }
+
+    /* INPUT AREA */
+    .input-area {
+        display: flex;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.2);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        gap: 12px;
+        align-items: center;
+    }
+
+    input {
+        flex: 1;
+        padding: 16px 20px;
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1rem;
+        outline: none;
+        transition: 0.3s ease;
+    }
+
+    input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    input:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: #00c6ff;
+        box-shadow: 0 0 15px rgba(0, 198, 255, 0.3);
+    }
+
+    button {
+        width: 50px;
+        height: 50px;
+        flex-shrink: 0; /* Prevents buttons from squishing into ovals on mobile */
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-send {
+        background: linear-gradient(135deg, #00c6ff, #0072ff);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 114, 255, 0.4);
+    }
+
+    .btn-send:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(0, 114, 255, 0.6);
+    }
+
+    .btn-voice {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-voice:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: #00c6ff;
+    }
+
+    .btn-stop {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-stop:hover {
+        background: rgba(239, 68, 68, 0.3);
+    }
+
+    /* Adding subtle pulse to active voice button */
+    .listening {
+        animation: pulseRecord 1.5s infinite;
+        background: rgba(239, 68, 68, 0.8) !important;
+        color: white !important;
+        border-color: #ef4444 !important;
+    }
+
+    @keyframes pulseRecord {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Typing Indicator */
+    .typing-indicator {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        padding: 14px 20px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom-left-radius: 4px;
+        max-width: fit-content;
+        animation: fadeSlideUp 0.4s ease forwards;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    .bx-typing {
+        width: 8px;
+        height: 8px;
+        background-color: #00c6ff;
+        border-radius: 50%;
+        animation: typing 1.5s infinite ease-in-out;
+    }
+    .bx-typing:nth-child(1) { animation-delay: 0s; }
+    .bx-typing:nth-child(2) { animation-delay: 0.2s; }
+    .bx-typing:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing {
+        0%, 100% { transform: translateY(0); opacity: 0.4; }
+        50% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* Medical Disclaimer */
+    .disclaimer {
+        text-align: center;
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 10px;
+        padding: 5px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Markdown Styling */
+    .message ul, .message ol { padding-left: 20px; margin-top: 5px; margin-bottom: 5px;}
+    .message li { margin-bottom: 4px; }
+    .message strong { color: #f1f5f9; font-weight: 600; }
+    .message p { margin-bottom: 5px; }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 600px) {
+        .container {
+            height: 100dvh;
+            border-radius: 0;
+            border: none;
+        }
+        .header {
+            padding: 12px 15px;
+        }
+        .header h3 {
+            font-size: 1.1rem;
+        }
+        .chat-box {
+            padding: 15px;
+        }
+        .input-area {
+            padding: 10px;
+            gap: 6px; /* Tighter gap to save space */
+        }
+        input {
+            padding: 12px 15px;
+            font-size: 0.95rem;
+            min-width: 0; /* Crucial: allows input to shrink instead of overflowing button! */
+        }
+        button {
+            width: 38px; /* Slightly smaller */
+            height: 38px;
+            font-size: 0.9rem;
+        }
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <h3><i class="fa-solid fa-heart-pulse"></i> Health AI Chatbot</h3>
+        <div class="header-actions">
+            <button class="btn-clear" onclick="clearChat()" title="Reset Session"><i class="fa-solid fa-trash-can"></i></button>
+            <select id="language">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+                <option value="te">Telugu</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- CHAT -->
+    <div id="chat" class="chat-box">
+        <div class="disclaimer">⚠️ AI Medical Disclaimer: This tool is for informational purposes only and is not a substitute for professional medical advice or treatment.</div>
+        <div class="message bot">👋 Hello! How are you feeling today? Tell me your symptoms.</div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+        <input id="input" autocomplete="off" placeholder="Type your symptoms here...">
+        <button class="btn-voice" id="mic-btn" onclick="startVoice()" title="Speak"><i class="fa-solid fa-microphone"></i></button>
+        <button class="btn-stop" onclick="stopVoice()" title="Stop Audio"><i class="fa-solid fa-volume-xmark"></i></button>
+        <button class="btn-send" onclick="sendMessage()" title="Send"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<!-- SCRIPT -->
+<script>
+let isSpeaking = false;
+let currentAudio = null;
+
+// SEND MESSAGE
+async function sendMessage() {
+    let input = document.getElementById("input");
+    let msg = input.value.trim();
+    let lang = document.getElementById("language").value;
+
+    if (!msg) return;
+
+    addMessage(msg, "user");
+    input.value = "";
+    
+    // Show typing indicator
+    showTyping();
+
+    try {
+        const res = await fetch("/chat", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({message: msg, lang: lang})
+        });
+
+        const data = await res.json();
+        
+        removeTyping();
+        addMessage(data.response, "bot");
+
+        // 🛑 STOP previous audio (FIXED)
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            currentAudio = null;
+            isSpeaking = false;
+        }
+
+        // 🔊 PLAY new audio (NO LOOP FIX)
+        if (data.audio && !isSpeaking) {
+            isSpeaking = true;
+
+            currentAudio = new Audio(data.audio + "?t=" + new Date().getTime());
+            currentAudio.play();
+
+            currentAudio.onended = () => {
+                isSpeaking = false;
+            };
+        }
+
+    } catch {
+        addMessage("⚠️ Server error", "bot");
+    }
+}
+
+// ADD MESSAGE
+function addMessage(text, type) {
+    let chat = document.getElementById("chat");
+
+    let div = document.createElement("div");
+    div.className = "message " + type;
+
+    if (type === "bot") {
+        div.innerHTML = marked.parse(text);
+    } else {
+        div.innerText = text;
+    }
+
+    chat.appendChild(div);
+    
+    // Smooth scroll
+    chat.scrollTo({
+        top: chat.scrollHeight,
+        behavior: 'smooth'
+    });
+}
+
+// CLEAR CHAT
+async function clearChat() {
+    try {
+        await fetch("/clear", { method: "POST" });
+        let chat = document.getElementById("chat");
+        chat.innerHTML = `<div class="disclaimer">⚠️ AI Medical Disclaimer: This tool is for informational purposes only and is not a substitute for professional medical advice or treatment.</div>
+        <div class="message bot">👋 Session cleared! How can I help you today?</div>`;
+        stopVoice();
+    } catch(e) {
+        console.error("Clear error", e);
+    }
+}
+
+// TYPING INDICATOR
+function showTyping() {
+    let chat = document.getElementById("chat");
+    let div = document.createElement("div");
+    div.id = "typing-indicator";
+    div.className = "typing-indicator";
+    div.innerHTML = `<div class="bx-typing"></div><div class="bx-typing"></div><div class="bx-typing"></div>`;
+    chat.appendChild(div);
+    chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+}
+
+function removeTyping() {
+    let el = document.getElementById("typing-indicator");
+    if (el) el.remove();
+}
+
+// 🎤 VOICE INPUT (AUTO SEND + FIX)
+function startVoice() {
+    stopVoice(); // ✅ STOP previous voice
+
+    if (isSpeaking) return;
+
+    let lang = document.getElementById("language").value;
+
+    let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+    if (lang === "te") recognition.lang = "te-IN";
+    else if (lang === "hi") recognition.lang = "hi-IN";
+    else recognition.lang = "en-US";
+
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    let micBtn = document.getElementById("mic-btn");
+    
+    recognition.onstart = function() {
+        micBtn.classList.add("listening");
+    };
+
+    recognition.onend = function() {
+        micBtn.classList.remove("listening");
+    };
+
+    recognition.start();
+
+    recognition.onresult = function(e) {
+        let text = e.results[0][0].transcript;
+        document.getElementById("input").value = text;
+
+        sendMessage(); // 🔥 AUTO SEND
+    };
+}
+
+// 🔇 STOP VOICE (ADDED)
+function stopVoice() {
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
+        isSpeaking = false;
+    }
+}
+
+// ENTER KEY SUPPORT
+document.getElementById("input").addEventListener("keypress", function(e){
+    if(e.key === "Enter"){
+        sendMessage();
+    }
+});
+</script>
+
+</body>
+</html>
